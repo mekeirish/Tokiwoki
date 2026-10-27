@@ -1,0 +1,797 @@
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Talkie-Walkie P2P PWA</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PeerJS CDN -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- QRCode.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- PWA Meta Tags & Web App Manifest -->
+    <meta name="theme-color" content="#121212">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Talkie P2P">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ff9800'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='%23121212' font-weight='bold'>⚡</text></svg>">
+    
+    <!-- Inline Manifest Data URI -->
+    <link rel="manifest" href='data:application/manifest+json,{
+        "name": "Talkie-Walkie P2P LAN",
+        "short_name": "TalkieP2P",
+        "start_url": "./",
+        "display": "standalone",
+        "background_color": "#121212",
+        "theme_color": "#ff9800",
+        "icons": [{
+            "src": "data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 rx=%2720%27 fill=%27%23ff9800%27/><text x=%2750%27 y=%2765%27 font-size=%2750%27 text-anchor=%27middle%27 fill=%27%23121212%27 font-weight=%27bold%27>⚡</text></svg>",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        }]
+    }'>
+
+    <style>
+        body {
+            background-color: #121212;
+            color: #e2e8f0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Glassmorphic Cyber UI Elements */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 152, 0, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-accent {
+            background: rgba(40, 50, 70, 0.8);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        /* PTT Button Styling & Dynamic Animations */
+        .ptt-button {
+            background: radial-gradient(circle, #ffb74d 0%, #ff9800 60%, #e65100 100%);
+            box-shadow: 0 0 25px rgba(255, 152, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -4px 8px rgba(0, 0, 0, 0.4);
+            transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .ptt-button:active, .ptt-button.active {
+            transform: scale(0.94);
+            background: radial-gradient(circle, #ff9800 0%, #e65100 70%, #bf360c 100%);
+            box-shadow: 0 0 45px rgba(255, 152, 0, 0.8), inset 0 4px 8px rgba(0, 0, 0, 0.6);
+            filter: brightness(1.1);
+        }
+
+        .pulse-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #ff9800;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .ptt-button.active .pulse-ring {
+            animation: pulseAnimation 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+        }
+
+        @keyframes pulseAnimation {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121212;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+    </style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4b6cb7">
+<link rel="apple-touch-icon" href="icon.png"></head>
+<body class="min-h-screen flex flex-col justify-between items-center p-3 sm:p-5 select-none overflow-x-hidden">
+
+    <!-- TOP HEADER -->
+    <header class="w-full max-w-md flex items-center justify-between glass-card p-4 rounded-2xl mb-3">
+        <div class="flex items-center space-x-3">
+            <div class="bg-amber-500/20 p-2.5 rounded-xl border border-amber-500/30 text-amber-500">
+                <i data-lucide="radio" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-wide text-white flex items-center gap-2">
+                    TALKIE P2P <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">LAN</span>
+                </h1>
+                <p class="text-xs text-slate-400">Canal Audio Direct WebRTC</p>
+            </div>
+        </div>
+        <!-- Mic Permission Badge -->
+        <div id="micStatus" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20" title="Statut Micro">
+            <i data-lucide="mic-off" class="w-3.5 h-3.5"></i>
+            <span id="micStatusText">Micro off</span>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="w-full max-w-md flex-1 flex flex-col gap-3 justify-center">
+
+        <!-- STATUS & AUDIO WAVE VISUALIZER -->
+        <section class="glass-card p-4 rounded-2xl flex flex-col items-center justify-between min-h-[140px] relative overflow-hidden">
+            <!-- Connection Status Badge -->
+            <div class="w-full flex justify-between items-center z-10">
+                <div class="text-xs text-slate-400 font-medium flex items-center gap-1.5">
+                    <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block animate-pulse"></span>
+                    <span id="statusText" class="text-slate-300 font-mono uppercase tracking-wider">Initialisation...</span>
+                </div>
+                <div id="peerConnectedInfo" class="hidden text-xs font-mono text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 flex items-center gap-1">
+                    <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                    <span id="connectedPeerIdShort">--</span>
+                </div>
+            </div>
+
+            <!-- Waveform Canvas -->
+            <div class="w-full my-2 flex justify-center items-center h-16 relative">
+                <canvas id="visualizerCanvas" class="w-full h-full rounded-lg"></canvas>
+                <div id="receptiveSignalText" class="absolute text-xs font-mono text-slate-500 uppercase tracking-widest pointer-events-none">
+                    [ Canal Inactif ]
+                </div>
+            </div>
+
+            <!-- Volume & Audio Controls -->
+            <div class="w-full flex items-center justify-between gap-3 z-10 pt-1 border-t border-slate-700/50">
+                <button id="muteBtn" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Couper le son entrant">
+                    <i data-lucide="volume-2" id="muteIcon" class="w-4 h-4"></i>
+                </button>
+                <div class="flex-1 flex items-center gap-2">
+                    <i data-lucide="volume-1" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" class="w-full accent-amber-500 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    <i data-lucide="volume-2" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- MAIN PTT (PUSH-TO-TALK) BUTTON SECTION -->
+        <section class="glass-card p-6 rounded-3xl flex flex-col items-center justify-center relative min-h-[260px]">
+            <div class="relative flex items-center justify-center">
+                <!-- PTT Button -->
+                <button id="pttBtn" disabled class="ptt-button w-44 h-44 sm:w-48 sm:h-48 rounded-full flex flex-col items-center justify-center text-slate-950 font-black tracking-wider cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed select-none relative z-10">
+                    <div class="pulse-ring"></div>
+                    <i data-lucide="mic" class="w-10 h-10 mb-1 drop-shadow"></i>
+                    <span class="text-sm font-bold text-center px-4 leading-tight drop-shadow">MAINTENIR POUR PARLER</span>
+                </button>
+            </div>
+            
+            <p id="pttInstruction" class="text-xs text-slate-400 text-center mt-5 font-mono">
+                Connectez-vous à un correspondant pour émettre
+            </p>
+        </section>
+
+        <!-- PEER IDENTITY & CONNECTION MANAGEMENT -->
+        <section class="glass-card p-4 rounded-2xl flex flex-col gap-3">
+            <!-- Local Identity Card -->
+            <div class="glass-card-accent p-3 rounded-xl flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] uppercase font-bold text-amber-400 tracking-wider block mb-0.5">Mon ID Talkie</span>
+                    <span id="myPeerId" class="font-mono text-sm font-bold text-white tracking-wide">Génération...</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button id="copyIdBtn" class="p-2 rounded-lg bg-slate-700/80 hover:bg-slate-600 text-slate-200 transition" title="Copier mon ID">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                    </button>
+                    <button id="showQrBtn" class="p-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 transition" title="Afficher QR Code">
+                        <i data-lucide="qr-code" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Connect to Remote Peer Form -->
+            <div class="flex flex-col gap-2">
+                <label class="text-xs text-slate-400 font-medium">Rejoindre un autre Talkie :</label>
+                <div class="flex gap-2">
+                    <input type="text" id="remotePeerIdInput" placeholder="Ex: walkie-8a2f" class="flex-1 bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2 text-sm font-mono text-white focus:outline-none focus:border-amber-500 transition placeholder:text-slate-600">
+                    <button id="connectBtn" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-bold rounded-xl text-sm transition flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
+                        <i data-lucide="link" class="w-4 h-4"></i>
+                        <span>Relier</span>
+                    </button>
+                    <button id="scanQrBtn" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl transition" title="Scanner QR Code">
+                        <i data-lucide="camera" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER SIGNATURE -->
+    <footer class="w-full max-w-md text-center py-2 mt-2">
+        <p class="text-[11px] text-slate-500 font-mono tracking-wide">
+            Made by Brahim Laiche 2026 Paris
+        </p>
+    </footer>
+
+    <!-- QR CODE GENERATOR MODAL -->
+    <div id="qrModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card p-6 rounded-3xl max-w-xs w-full flex flex-col items-center gap-4 relative">
+            <button id="closeQrModal" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="font-bold text-white text-base">Flash pour connecter</h3>
+            <div id="qrcodeContainer" class="p-3 bg-white rounded-2xl shadow-inner"></div>
+            <p id="qrPeerIdText" class="font-mono text-xs text-amber-400 font-bold"></p>
+        </div>
+    </div>
+
+    <!-- QR CODE CAMERA SCANNER MODAL -->
+    <div id="scannerModal" class="fixed inset-0 bg-black/90 z-50 hidden flex flex-col items-center justify-between p-4">
+        <div class="w-full max-w-md flex justify-between items-center py-2">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                <i data-lucide="camera" class="w-4 h-4 text-amber-500"></i> Scannez le QR Code
+            </h3>
+            <button id="closeScannerModal" class="p-2 rounded-full bg-slate-800 text-slate-300">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        
+        <div class="relative w-full max-w-sm aspect-square bg-slate-900 rounded-2xl overflow-hidden border-2 border-amber-500/40 flex items-center justify-center">
+            <video id="scannerVideo" class="w-full h-full object-cover" playsinline></video>
+            <div class="absolute inset-8 border-2 border-dashed border-amber-500/80 rounded-xl pointer-events-none animate-pulse"></div>
+        </div>
+
+        <div class="w-full max-w-md text-center py-4">
+            <label class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-amber-400 rounded-xl cursor-pointer inline-flex items-center gap-2 border border-slate-700">
+                <i data-lucide="image" class="w-4 h-4"></i> Importer une image QR
+                <input type="file" id="qrFileInput" accept="image/*" class="hidden">
+            </label>
+        </div>
+    </div>
+
+    <!-- INVISIBLE AUDIO ELEMENT FOR INCOMING VOICE STREAM -->
+    <audio id="remoteAudio" autoplay playsinline class="hidden"></audio>
+
+    <!-- JS APPLICATION LOGIC -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Register Inline Service Worker for PWA capability
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => new Response('Offline'))));
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log('SW reg error:', err));
+        }
+
+        // State Variables
+        let peer = null;
+        let activeCall = null;
+        let localAudioStream = null;
+        let localAudioTrack = null;
+        let audioCtx = null;
+        let incomingAnalyser = null;
+        let isTransmitting = false;
+        let isMuted = false;
+        let videoScannerStream = null;
+
+        // UI Element References
+        const myPeerIdEl = document.getElementById('myPeerId');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const pttBtn = document.getElementById('pttBtn');
+        const pttInstruction = document.getElementById('pttInstruction');
+        const micStatus = document.getElementById('micStatus');
+        const micStatusText = document.getElementById('micStatusText');
+        const remotePeerIdInput = document.getElementById('remotePeerIdInput');
+        const connectBtn = document.getElementById('connectBtn');
+        const peerConnectedInfo = document.getElementById('peerConnectedInfo');
+        const connectedPeerIdShort = document.getElementById('connectedPeerIdShort');
+        const remoteAudio = document.getElementById('remoteAudio');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const muteBtn = document.getElementById('muteBtn');
+        const muteIcon = document.getElementById('muteIcon');
+        const canvas = document.getElementById('visualizerCanvas');
+        const canvasCtx = canvas.getContext('2d');
+        const receptiveSignalText = document.getElementById('receptiveSignalText');
+
+        // Random Clean Peer ID Generator (walkie-XXXX)
+        function generateWalkieId() {
+            const chars = '23456789abcdefghjkmnpqrstuvwxyz';
+            let randomStr = '';
+            for (let i = 0; i < 4; i++) {
+                randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return `walkie-${randomStr}`;
+        }
+
+        const myGeneratedId = generateWalkieId();
+
+        // Web Audio Synthesizer: Sound Effects (Squelch / Roger Beep)
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Realistic Squelch Noise + Roger Beep Sound Generator
+        function playRadioSound(type) {
+            try {
+                initAudioContext();
+                const now = audioCtx.currentTime;
+
+                if (type === 'start') {
+                    // Squelch Burst on PTT press
+                    const bufferSize = audioCtx.sampleRate * 0.08; // 80ms noise
+                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+
+                    const noise = audioCtx.createBufferSource();
+                    noise.buffer = buffer;
+
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.setValueAtTime(1200, now);
+                    filter.Q.setValueAtTime(3.0, now);
+
+                    const gain = audioCtx.createGain();
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+                    noise.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    noise.start(now);
+                } else if (type === 'roger') {
+                    // Classic dual-tone Roger Beep on release / transmission end
+                    const osc1 = audioCtx.createOscillator();
+                    const osc2 = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc1.type = 'sine';
+                    osc2.type = 'sine';
+                    osc1.frequency.setValueAtTime(1200, now);
+                    osc2.frequency.setValueAtTime(1200, now + 0.07);
+
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc1.start(now);
+                    osc1.stop(now + 0.07);
+                    osc2.start(now + 0.07);
+                    osc2.stop(now + 0.15);
+                }
+            } catch (e) {
+                console.log("Audio FX error:", e);
+            }
+        }
+
+        // Haptic Feedback Helper
+        function triggerHaptic(pattern = 30) {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(pattern);
+            }
+        }
+
+        // User Media Initialization (Microphone)
+        async function initMicrophone() {
+            try {
+                localAudioStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    },
+                    video: false
+                });
+
+                localAudioTrack = localAudioStream.getAudioTracks()[0];
+                localAudioTrack.enabled = false; // Muted by default until PTT pressed
+
+                micStatus.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                micStatusText.textContent = "Micro Prêt";
+                micStatus.querySelector('i').replaceWith(lucide.createIcons());
+                
+                return true;
+            } catch (err) {
+                console.error("Microphone Access Error:", err);
+                micStatus.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20";
+                micStatusText.textContent = "Micro Refusé";
+                alert("Accès microphone requis pour utiliser le Talkie-Walkie.");
+                return false;
+            }
+        }
+
+        // Initialize PeerJS Connection Broker
+        function initPeer() {
+            updateStatus('connecting', 'Connexion au serveur...');
+            
+            peer = new Peer(myGeneratedId, {
+                debug: 1
+            });
+
+            peer.on('open', (id) => {
+                myPeerIdEl.textContent = id;
+                updateStatus('ready', 'Prêt à connecter');
+            });
+
+            peer.on('call', async (call) => {
+                // Auto-answer incoming call
+                if (!localAudioStream) {
+                    await initMicrophone();
+                }
+                
+                call.answer(localAudioStream);
+                setupCallHandlers(call);
+            });
+
+            peer.on('error', (err) => {
+                console.error("PeerJS Error:", err);
+                if (err.type === 'peer-not-found') {
+                    alert("Correspondant introuvable. Vérifiez l'ID.");
+                }
+                updateStatus('ready', 'Erreur de connexion');
+            });
+
+            peer.on('disconnected', () => {
+                updateStatus('disconnected', 'Déconnecté');
+            });
+        }
+
+        // Setup Call Handlers & Stream Binding
+        function setupCallHandlers(call) {
+            activeCall = call;
+
+            call.on('stream', (remoteStream) => {
+                remoteAudio.srcObject = remoteStream;
+                remoteAudio.volume = parseFloat(volumeSlider.value);
+                
+                const connectedId = call.peer;
+                connectedPeerIdShort.textContent = connectedId;
+                peerConnectedInfo.classList.remove('hidden');
+                
+                updateStatus('connected', `Relier à ${connectedId}`);
+                pttBtn.disabled = false;
+                pttInstruction.textContent = "Maintenez le bouton orange pour transmettre l'audio";
+
+                // Attach incoming audio analyzer for visualizer
+                setupIncomingAudioVisualizer(remoteStream);
+                playRadioSound('roger');
+            });
+
+            call.on('close', () => {
+                handleCallDisconnected();
+            });
+
+            call.on('error', (err) => {
+                console.error("Call error:", err);
+                handleCallDisconnected();
+            });
+        }
+
+        function handleCallDisconnected() {
+            activeCall = null;
+            peerConnectedInfo.classList.add('hidden');
+            pttBtn.disabled = true;
+            pttInstruction.textContent = "Connectez-vous à un correspondant pour émettre";
+            updateStatus('ready', 'Prêt à connecter');
+            playRadioSound('roger');
+        }
+
+        // Connection Status Indicator Updater
+        function updateStatus(state, message) {
+            statusText.textContent = message;
+            statusDot.className = "w-2.5 h-2.5 rounded-full inline-block ";
+            
+            if (state === 'connecting') {
+                statusDot.classList.add('bg-amber-500', 'animate-pulse');
+            } else if (state === 'ready') {
+                statusDot.classList.add('bg-blue-500');
+            } else if (state === 'connected') {
+                statusDot.classList.add('bg-emerald-500', 'animate-pulse');
+            } else {
+                statusDot.classList.add('bg-red-500');
+            }
+        }
+
+        // Connect to Remote Peer Action
+        async function connectToPeer(targetPeerId) {
+            if (!targetPeerId) return;
+            targetPeerId = targetPeerId.trim();
+
+            if (targetPeerId === myGeneratedId) {
+                alert("Vous ne pouvez pas vous connecter à vous-même.");
+                return;
+            }
+
+            updateStatus('connecting', `Appel de ${targetPeerId}...`);
+
+            if (!localAudioStream) {
+                const micGranted = await initMicrophone();
+                if (!micGranted) return;
+            }
+
+            const call = peer.call(targetPeerId, localAudioStream);
+            setupCallHandlers(call);
+        }
+
+        // Incoming Audio Visualizer (Canvas Waveform / Signal Meter)
+        function setupIncomingAudioVisualizer(stream) {
+            initAudioContext();
+            const source = audioCtx.createMediaStreamSource(stream);
+            incomingAnalyser = audioCtx.createAnalyser();
+            incomingAnalyser.fftSize = 64;
+            source.connect(incomingAnalyser);
+
+            drawVisualizer();
+        }
+
+        function drawVisualizer() {
+            requestAnimationFrame(drawVisualizer);
+
+            const width = canvas.width = canvas.offsetWidth;
+            const height = canvas.height = canvas.offsetHeight;
+
+            canvasCtx.clearRect(0, 0, width, height);
+
+            if (!incomingAnalyser || !activeCall) {
+                receptiveSignalText.classList.remove('hidden');
+                return;
+            }
+
+            const bufferLength = incomingAnalyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            incomingAnalyser.getByteFrequencyData(dataArray);
+
+            // Calculate average volume level
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+            }
+            const average = sum / bufferLength;
+
+            if (average > 10) {
+                receptiveSignalText.classList.add('hidden');
+            } else {
+                receptiveSignalText.classList.remove('hidden');
+            }
+
+            // Draw Audio Spectrum Bars
+            const barWidth = (width / bufferLength) * 1.5;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const barHeight = (dataArray[i] / 255) * height;
+
+                const gradient = canvasCtx.createLinearGradient(0, height, 0, 0);
+                gradient.addColorStop(0, 'rgba(255, 152, 0, 0.2)');
+                gradient.addColorStop(1, '#ff9800');
+
+                canvasCtx.fillStyle = gradient;
+                canvasCtx.fillRect(x, height - barHeight, barWidth - 2, barHeight);
+
+                x += barWidth;
+            }
+        }
+
+        // Push-To-Talk (PTT) Logic
+        function startTransmission(e) {
+            if (e) e.preventDefault();
+            if (!activeCall || isTransmitting) return;
+
+            initAudioContext();
+            isTransmitting = true;
+
+            if (localAudioTrack) {
+                localAudioTrack.enabled = true;
+            }
+
+            pttBtn.classList.add('active');
+            pttInstruction.textContent = "TRANSMISSION AUDIO EN COURS...";
+            pttInstruction.classList.add('text-amber-400', 'font-bold');
+
+            triggerHaptic([40]);
+            playRadioSound('start');
+        }
+
+        function stopTransmission(e) {
+            if (e) e.preventDefault();
+            if (!isTransmitting) return;
+
+            isTransmitting = false;
+
+            if (localAudioTrack) {
+                localAudioTrack.enabled = false;
+            }
+
+            pttBtn.classList.remove('active');
+            pttInstruction.textContent = "Maintenez le bouton orange pour transmettre l'audio";
+            pttInstruction.classList.remove('text-amber-400', 'font-bold');
+
+            triggerHaptic([20, 30]);
+            playRadioSound('roger');
+        }
+
+        // PTT Event Listeners (Touch & Mouse Support)
+        pttBtn.addEventListener('mousedown', startTransmission);
+        pttBtn.addEventListener('mouseup', stopTransmission);
+        pttBtn.addEventListener('mouseleave', stopTransmission);
+
+        pttBtn.addEventListener('touchstart', startTransmission, { passive: false });
+        pttBtn.addEventListener('touchend', stopTransmission, { passive: false });
+        pttBtn.addEventListener('touchcancel', stopTransmission, { passive: false });
+
+        // Volume & Mute Controls
+        volumeSlider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            remoteAudio.volume = val;
+            if (val === 0) {
+                isMuted = true;
+                muteIcon.setAttribute('data-lucide', 'volume-x');
+            } else {
+                isMuted = false;
+                muteIcon.setAttribute('data-lucide', 'volume-2');
+            }
+            lucide.createIcons();
+        });
+
+        muteBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            if (isMuted) {
+                remoteAudio.volume = 0;
+                volumeSlider.value = 0;
+                muteIcon.setAttribute('data-lucide', 'volume-x');
+            } else {
+                remoteAudio.volume = 1;
+                volumeSlider.value = 1;
+                muteIcon.setAttribute('data-lucide', 'volume-2');
+            }
+            lucide.createIcons();
+        });
+
+        // Copy ID Button
+        document.getElementById('copyIdBtn').addEventListener('click', () => {
+            const textToCopy = myPeerIdEl.textContent;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy);
+            } else {
+                // Fallback execCommand
+                const input = document.createElement('input');
+                input.value = textToCopy;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+            }
+            triggerHaptic(20);
+            alert(`ID Talkie copié : ${textToCopy}`);
+        });
+
+        // Manual Connection Form Submit
+        connectBtn.addEventListener('click', () => {
+            const targetId = remotePeerIdInput.value;
+            connectToPeer(targetId);
+        });
+
+        // QR Code Generator Modal Handler
+        const qrModal = document.getElementById('qrModal');
+        const qrcodeContainer = document.getElementById('qrcodeContainer');
+        const qrPeerIdText = document.getElementById('qrPeerIdText');
+
+        document.getElementById('showQrBtn').addEventListener('click', () => {
+            qrcodeContainer.innerHTML = '';
+            new QRCode(qrcodeContainer, {
+                text: myGeneratedId,
+                width: 180,
+                height: 180,
+                colorDark: "#121212",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            qrPeerIdText.textContent = myGeneratedId;
+            qrModal.classList.remove('hidden');
+        });
+
+        document.getElementById('closeQrModal').addEventListener('click', () => {
+            qrModal.classList.add('hidden');
+        });
+
+        // QR Code Scanner Logic via Native Camera getUserMedia
+        const scannerModal = document.getElementById('scannerModal');
+        const scannerVideo = document.getElementById('scannerVideo');
+
+        document.getElementById('scanQrBtn').addEventListener('click', async () => {
+            scannerModal.classList.remove('hidden');
+            try {
+                videoScannerStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                scannerVideo.srcObject = videoScannerStream;
+            } catch (err) {
+                alert("Impossible d'accéder à la caméra pour scanner.");
+                scannerModal.classList.add('hidden');
+            }
+        });
+
+        function closeScanner() {
+            if (videoScannerStream) {
+                videoScannerStream.getTracks().forEach(track => track.stop());
+                videoScannerStream = null;
+            }
+            scannerModal.classList.add('hidden');
+        }
+
+        document.getElementById('closeScannerModal').addEventListener('click', closeScanner);
+
+        // QR Code File Upload Fallback Scanner
+        document.getElementById('qrFileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    // Manual QR Decode attempt prompt for fallback
+                    const promptVal = prompt("ID du Talkie détecté sur l'image (saisie rapide) :", "");
+                    if (promptVal) {
+                        remotePeerIdInput.value = promptVal;
+                        closeScanner();
+                        connectToPeer(promptVal);
+                    }
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // App Initialization on Page Load
+        window.addEventListener('load', () => {
+            initPeer();
+            // Pre-request microphone permission on first click anywhere
+            document.body.addEventListener('click', () => {
+                initAudioContext();
+                if (!localAudioStream) {
+                    initMicrophone();
+                }
+            }, { once: true });
+        });
+    </script>
+
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}</script>
+</body>
+</html>
+```
