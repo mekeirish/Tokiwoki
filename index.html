@@ -5,24 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Talkie-Walkie P2P PWA</title>
-    
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PeerJS CDN -->
+    <!-- PeerJS CDN pour WebRTC P2P -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <!-- QRCode.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- PWA Meta Tags & Web App Manifest -->
+    <!-- Meta Tags PWA & Web App Manifest via Data-URI -->
     <meta name="theme-color" content="#121212">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Talkie P2P">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ff9800'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='%23121212' font-weight='bold'>⚡</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ff9800'/><text x='50' y='67' font-size='55' text-anchor='middle' fill='%23121212' font-weight='bold'>⚡</text></svg>">
     
-    <!-- Inline Manifest Data URI -->
     <link rel="manifest" href='data:application/manifest+json,{
         "name": "Talkie-Walkie P2P LAN",
         "short_name": "TalkieP2P",
@@ -31,7 +30,7 @@
         "background_color": "#121212",
         "theme_color": "#ff9800",
         "icons": [{
-            "src": "data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 rx=%2720%27 fill=%27%23ff9800%27/><text x=%2750%27 y=%2765%27 font-size=%2750%27 text-anchor=%27middle%27 fill=%27%23121212%27 font-weight=%27bold%27>⚡</text></svg>",
+            "src": "data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 rx=%2720%27 fill=%27%23ff9800%27/><text x=%2750%27 y=%2767%27 font-size=%2755%27 text-anchor=%27middle%27 fill=%27%23121212%27 font-weight=%27bold%27>⚡</text></svg>",
             "sizes": "192x192",
             "type": "image/svg+xml"
         }]
@@ -41,39 +40,39 @@
         body {
             background-color: #121212;
             color: #e2e8f0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Glassmorphic Cyber UI Elements */
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 152, 0, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        .glass-card-accent {
-            background: rgba(40, 50, 70, 0.8);
-            border: 1px solid rgba(255, 152, 0, 0.3);
-        }
-
-        /* PTT Button Styling & Dynamic Animations */
-        .ptt-button {
-            background: radial-gradient(circle, #ffb74d 0%, #ff9800 60%, #e65100 100%);
-            box-shadow: 0 0 25px rgba(255, 152, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -4px 8px rgba(0, 0, 0, 0.4);
-            transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
             user-select: none;
             -webkit-user-select: none;
         }
 
+        /* Dark Cyber Glassmorphism UI */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 152, 0, 0.18);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card-subtle {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Custom Push-To-Talk Button */
+        .ptt-button {
+            background: radial-gradient(circle, #ffb74d 0%, #ff9800 60%, #e65100 100%);
+            box-shadow: 0 0 30px rgba(255, 152, 0, 0.45), inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -4px 8px rgba(0, 0, 0, 0.5);
+            transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+        }
+
         .ptt-button:active, .ptt-button.active {
-            transform: scale(0.94);
+            transform: scale(0.93);
             background: radial-gradient(circle, #ff9800 0%, #e65100 70%, #bf360c 100%);
-            box-shadow: 0 0 45px rgba(255, 152, 0, 0.8), inset 0 4px 8px rgba(0, 0, 0, 0.6);
-            filter: brightness(1.1);
+            box-shadow: 0 0 50px rgba(255, 152, 0, 0.85), inset 0 4px 10px rgba(0, 0, 0, 0.7);
+            filter: brightness(1.15);
         }
 
         .pulse-ring {
@@ -91,8 +90,8 @@
         }
 
         @keyframes pulseAnimation {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.4); opacity: 0; }
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(1.45); opacity: 0; }
         }
 
         /* Custom Scrollbar */
@@ -111,38 +110,46 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#4b6cb7">
 <link rel="apple-touch-icon" href="icon.png"></head>
-<body class="min-h-screen flex flex-col justify-between items-center p-3 sm:p-5 select-none overflow-x-hidden">
+<body class="min-h-screen flex flex-col justify-between items-center p-3 sm:p-5 overflow-x-hidden relative">
 
     <!-- TOP HEADER -->
-    <header class="w-full max-w-md flex items-center justify-between glass-card p-4 rounded-2xl mb-3">
+    <header class="w-full max-w-md flex items-center justify-between glass-card p-3.5 sm:p-4 rounded-2xl mb-3 z-10">
         <div class="flex items-center space-x-3">
             <div class="bg-amber-500/20 p-2.5 rounded-xl border border-amber-500/30 text-amber-500">
                 <i data-lucide="radio" class="w-6 h-6"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg tracking-wide text-white flex items-center gap-2">
-                    TALKIE P2P <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">LAN</span>
+                <h1 class="font-bold text-base sm:text-lg tracking-wide text-white flex items-center gap-2">
+                    TALKIE P2P <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">LAN / Wi-Fi</span>
                 </h1>
-                <p class="text-xs text-slate-400">Canal Audio Direct WebRTC</p>
+                <p class="text-xs text-slate-400">Communication Audio Directe</p>
             </div>
         </div>
-        <!-- Mic Permission Badge -->
-        <div id="micStatus" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20" title="Statut Micro">
-            <i data-lucide="mic-off" class="w-3.5 h-3.5"></i>
-            <span id="micStatusText">Micro off</span>
+
+        <div class="flex items-center gap-2">
+            <!-- Mic Status Badge -->
+            <div id="micStatus" class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20" title="Statut Micro">
+                <i data-lucide="mic-off" class="w-3.5 h-3.5"></i>
+                <span id="micStatusText" class="hidden sm:inline">Off</span>
+            </div>
+            
+            <!-- Help Button '?' -->
+            <button id="helpBtn" class="w-9 h-9 rounded-full bg-slate-800/90 hover:bg-amber-500/20 hover:text-amber-400 text-slate-300 border border-slate-700 hover:border-amber-500/40 flex items-center justify-center transition active:scale-95" title="Aide et Mode d'emploi">
+                <i data-lucide="help-circle" class="w-5 h-5"></i>
+            </button>
         </div>
     </header>
 
     <!-- MAIN CONTAINER -->
-    <main class="w-full max-w-md flex-1 flex flex-col gap-3 justify-center">
+    <main class="w-full max-w-md flex-1 flex flex-col gap-3 justify-center z-10">
 
         <!-- STATUS & AUDIO WAVE VISUALIZER -->
-        <section class="glass-card p-4 rounded-2xl flex flex-col items-center justify-between min-h-[140px] relative overflow-hidden">
+        <section class="glass-card p-4 rounded-2xl flex flex-col items-center justify-between min-h-[135px] relative overflow-hidden">
             <!-- Connection Status Badge -->
             <div class="w-full flex justify-between items-center z-10">
                 <div class="text-xs text-slate-400 font-medium flex items-center gap-1.5">
                     <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block animate-pulse"></span>
-                    <span id="statusText" class="text-slate-300 font-mono uppercase tracking-wider">Initialisation...</span>
+                    <span id="statusText" class="text-slate-300 font-mono uppercase tracking-wider text-[11px]">Initialisation...</span>
                 </div>
                 <div id="peerConnectedInfo" class="hidden text-xs font-mono text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 flex items-center gap-1">
                     <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
@@ -151,16 +158,16 @@
             </div>
 
             <!-- Waveform Canvas -->
-            <div class="w-full my-2 flex justify-center items-center h-16 relative">
+            <div class="w-full my-2 flex justify-center items-center h-14 relative">
                 <canvas id="visualizerCanvas" class="w-full h-full rounded-lg"></canvas>
-                <div id="receptiveSignalText" class="absolute text-xs font-mono text-slate-500 uppercase tracking-widest pointer-events-none">
-                    [ Canal Inactif ]
+                <div id="receptiveSignalText" class="absolute text-[11px] font-mono text-slate-500 uppercase tracking-widest pointer-events-none">
+                    [ Canal En Attente ]
                 </div>
             </div>
 
             <!-- Volume & Audio Controls -->
             <div class="w-full flex items-center justify-between gap-3 z-10 pt-1 border-t border-slate-700/50">
-                <button id="muteBtn" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Couper le son entrant">
+                <button id="muteBtn" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition active:scale-95" title="Couper/Rétablir le son entrant">
                     <i data-lucide="volume-2" id="muteIcon" class="w-4 h-4"></i>
                 </button>
                 <div class="flex-1 flex items-center gap-2">
@@ -172,49 +179,49 @@
         </section>
 
         <!-- MAIN PTT (PUSH-TO-TALK) BUTTON SECTION -->
-        <section class="glass-card p-6 rounded-3xl flex flex-col items-center justify-center relative min-h-[260px]">
+        <section class="glass-card p-5 sm:p-6 rounded-3xl flex flex-col items-center justify-center relative min-h-[250px]">
             <div class="relative flex items-center justify-center">
                 <!-- PTT Button -->
-                <button id="pttBtn" disabled class="ptt-button w-44 h-44 sm:w-48 sm:h-48 rounded-full flex flex-col items-center justify-center text-slate-950 font-black tracking-wider cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed select-none relative z-10">
+                <button id="pttBtn" disabled class="ptt-button w-44 h-44 sm:w-48 sm:h-48 rounded-full flex flex-col items-center justify-center text-slate-950 font-black tracking-wider cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed select-none relative z-10 touch-none">
                     <div class="pulse-ring"></div>
                     <i data-lucide="mic" class="w-10 h-10 mb-1 drop-shadow"></i>
-                    <span class="text-sm font-bold text-center px-4 leading-tight drop-shadow">MAINTENIR POUR PARLER</span>
+                    <span class="text-xs sm:text-sm font-black text-center px-4 leading-tight drop-shadow uppercase">MAINTENIR POUR PARLER</span>
                 </button>
             </div>
             
-            <p id="pttInstruction" class="text-xs text-slate-400 text-center mt-5 font-mono">
-                Connectez-vous à un correspondant pour émettre
+            <p id="pttInstruction" class="text-xs text-slate-400 text-center mt-4 font-mono">
+                Appairez un correspondant pour émettre
             </p>
         </section>
 
         <!-- PEER IDENTITY & CONNECTION MANAGEMENT -->
         <section class="glass-card p-4 rounded-2xl flex flex-col gap-3">
             <!-- Local Identity Card -->
-            <div class="glass-card-accent p-3 rounded-xl flex items-center justify-between">
+            <div class="glass-card-subtle p-3 rounded-xl flex items-center justify-between">
                 <div>
                     <span class="text-[10px] uppercase font-bold text-amber-400 tracking-wider block mb-0.5">Mon ID Talkie</span>
                     <span id="myPeerId" class="font-mono text-sm font-bold text-white tracking-wide">Génération...</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <button id="copyIdBtn" class="p-2 rounded-lg bg-slate-700/80 hover:bg-slate-600 text-slate-200 transition" title="Copier mon ID">
+                    <button id="copyIdBtn" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition active:scale-95" title="Copier mon ID">
                         <i data-lucide="copy" class="w-4 h-4"></i>
                     </button>
-                    <button id="showQrBtn" class="p-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 transition" title="Afficher QR Code">
+                    <button id="showQrBtn" class="p-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 transition active:scale-95" title="Afficher mon QR Code">
                         <i data-lucide="qr-code" class="w-4 h-4"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Connect to Remote Peer Form -->
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-1.5">
                 <label class="text-xs text-slate-400 font-medium">Rejoindre un autre Talkie :</label>
                 <div class="flex gap-2">
-                    <input type="text" id="remotePeerIdInput" placeholder="Ex: walkie-8a2f" class="flex-1 bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2 text-sm font-mono text-white focus:outline-none focus:border-amber-500 transition placeholder:text-slate-600">
+                    <input type="text" id="remotePeerIdInput" placeholder="Ex: TALK-8A2F" class="flex-1 bg-slate-900/90 border border-slate-700 rounded-xl px-3.5 py-2 text-sm font-mono text-white focus:outline-none focus:border-amber-500 transition placeholder:text-slate-600">
                     <button id="connectBtn" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-bold rounded-xl text-sm transition flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
                         <i data-lucide="link" class="w-4 h-4"></i>
                         <span>Relier</span>
                     </button>
-                    <button id="scanQrBtn" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl transition" title="Scanner QR Code">
+                    <button id="scanQrBtn" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl transition active:scale-95" title="Scanner QR Code">
                         <i data-lucide="camera" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -224,14 +231,80 @@
     </main>
 
     <!-- FOOTER SIGNATURE -->
-    <footer class="w-full max-w-md text-center py-2 mt-2">
+    <footer class="w-full max-w-md text-center py-2 mt-1 z-10">
         <p class="text-[11px] text-slate-500 font-mono tracking-wide">
             Made by Brahim Laiche 2026 Paris
         </p>
     </footer>
 
-    <!-- QR CODE GENERATOR MODAL -->
-    <div id="qrModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <!-- FLOATING PWA INSTALL BUTTON -->
+    <div id="pwaInstallContainer" class="fixed bottom-14 left-1/2 transform -translate-x-1/2 z-40 hidden w-full max-w-xs px-4">
+        <button id="pwaInstallBtn" class="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs rounded-2xl shadow-2xl shadow-amber-500/50 flex items-center justify-center gap-2 border border-amber-300/40 active:scale-95 transition">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Installer l'application Talkie PWA</span>
+        </button>
+    </div>
+
+    <!-- MODAL 1: MODE D'EMPLOI & AIDE '?' -->
+    <div id="helpModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card p-5 sm:p-6 rounded-3xl max-w-sm w-full flex flex-col gap-4 relative max-h-[90vh] overflow-y-auto">
+            <button id="closeHelpModal" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800/60">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3 border-b border-slate-700/60 pb-3">
+                <div class="p-2 bg-amber-500/20 text-amber-500 rounded-xl border border-amber-500/30">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white text-base">Guide d'utilisation</h3>
+                    <p class="text-xs text-slate-400">Communication P2P Wi-Fi Locale</p>
+                </div>
+            </div>
+
+            <div class="space-y-3.5 text-xs text-slate-300">
+                <div class="flex gap-3 items-start">
+                    <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center flex-shrink-0 mt-0.5 border border-amber-500/30">1</span>
+                    <div>
+                        <strong class="text-white block mb-0.5">Réseau Wi-Fi Commun :</strong>
+                        Connectez les deux appareils au même réseau Wi-Fi local (ou activez le Point d'accès / Partage de connexion d'un des deux smartphones).
+                    </div>
+                </div>
+
+                <div class="flex gap-3 items-start">
+                    <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center flex-shrink-0 mt-0.5 border border-amber-500/30">2</span>
+                    <div>
+                        <strong class="text-white block mb-0.5">Appairage Rapide :</strong>
+                        Scannez le QR Code de votre correspondant ou saisissez manuellement son ID unique (ex: <code class="text-amber-400 bg-slate-800 px-1 py-0.5 rounded">TALK-XXXX</code>), puis cliquez sur <strong>Relier</strong>.
+                    </div>
+                </div>
+
+                <div class="flex gap-3 items-start">
+                    <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center flex-shrink-0 mt-0.5 border border-amber-500/30">3</span>
+                    <div>
+                        <strong class="text-white block mb-0.5">Push-To-Talk (PTT) :</strong>
+                        Maintenez le grand bouton orange enfoncé pour parler. Relâchez pour réécouter votre interlocuteur (un signal sonore <i>Roger Beep</i> confirme la fin d'émission).
+                    </div>
+                </div>
+
+                <div class="flex gap-3 items-start">
+                    <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center flex-shrink-0 mt-0.5 border border-amber-500/30">4</span>
+                    <div>
+                        <strong class="text-white block mb-0.5">Gratuit & Privé :</strong>
+                        Une fois la liaison établie, l'audio passe directement d'appareil à appareil (Peer-to-Peer WebRTC) sans passer par un serveur tiers ni consommer votre forfait internet.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between text-[11px] text-slate-400">
+                <span>Version PWA Autonome</span>
+                <span class="font-mono text-amber-400">Brahim Laiche 2026 Paris</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: QR CODE GENERATOR -->
+    <div id="qrModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="glass-card p-6 rounded-3xl max-w-xs w-full flex flex-col items-center gap-4 relative">
             <button id="closeQrModal" class="absolute top-4 right-4 text-slate-400 hover:text-white">
                 <i data-lucide="x" class="w-5 h-5"></i>
@@ -242,7 +315,7 @@
         </div>
     </div>
 
-    <!-- QR CODE CAMERA SCANNER MODAL -->
+    <!-- MODAL 3: QR CODE CAMERA SCANNER -->
     <div id="scannerModal" class="fixed inset-0 bg-black/90 z-50 hidden flex flex-col items-center justify-between p-4">
         <div class="w-full max-w-md flex justify-between items-center py-2">
             <h3 class="font-bold text-white text-sm flex items-center gap-2">
@@ -266,15 +339,15 @@
         </div>
     </div>
 
-    <!-- INVISIBLE AUDIO ELEMENT FOR INCOMING VOICE STREAM -->
+    <!-- AUDIO ELEMENT POUR L'AUDIO ENTRANT -->
     <audio id="remoteAudio" autoplay playsinline class="hidden"></audio>
 
-    <!-- JS APPLICATION LOGIC -->
+    <!-- LOGIQUE JAVASCRIPT DE L'APPLICATION -->
     <script>
-        // Initialize Lucide Icons
+        // Initialisation des icônes Lucide
         lucide.createIcons();
 
-        // Register Inline Service Worker for PWA capability
+        // Enregistrement du Service Worker embarqué pour compatibilité PWA
         if ('serviceWorker' in navigator) {
             const swCode = `
                 self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
@@ -282,21 +355,23 @@
                 self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => new Response('Offline'))));
             `;
             const blob = new Blob([swCode], { type: 'application/javascript' });
-            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log('SW reg error:', err));
+            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log('SW Registration:', err));
         }
 
-        // State Variables
+        // Variables d'état globales
         let peer = null;
         let activeCall = null;
         let localAudioStream = null;
         let localAudioTrack = null;
         let audioCtx = null;
         let incomingAnalyser = null;
+        let outgoingAnalyser = null;
         let isTransmitting = false;
         let isMuted = false;
         let videoScannerStream = null;
+        let deferredPrompt = null;
 
-        // UI Element References
+        // Éléments du DOM
         const myPeerIdEl = document.getElementById('myPeerId');
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
@@ -316,19 +391,19 @@
         const canvasCtx = canvas.getContext('2d');
         const receptiveSignalText = document.getElementById('receptiveSignalText');
 
-        // Random Clean Peer ID Generator (walkie-XXXX)
+        // Générateur d'ID court formaté : TALK-XXXX
         function generateWalkieId() {
-            const chars = '23456789abcdefghjkmnpqrstuvwxyz';
-            let randomStr = '';
+            const chars = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+            let code = '';
             for (let i = 0; i < 4; i++) {
-                randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            return `walkie-${randomStr}`;
+            return `TALK-${code}`;
         }
 
         const myGeneratedId = generateWalkieId();
 
-        // Web Audio Synthesizer: Sound Effects (Squelch / Roger Beep)
+        // Gestion de l'audio Web Audio API (Squelch + Roger Beep)
         function initAudioContext() {
             if (!audioCtx) {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -339,15 +414,14 @@
             }
         }
 
-        // Realistic Squelch Noise + Roger Beep Sound Generator
         function playRadioSound(type) {
             try {
                 initAudioContext();
                 const now = audioCtx.currentTime;
 
                 if (type === 'start') {
-                    // Squelch Burst on PTT press
-                    const bufferSize = audioCtx.sampleRate * 0.08; // 80ms noise
+                    // Squelch Noise
+                    const bufferSize = audioCtx.sampleRate * 0.07;
                     const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
                     const data = buffer.getChannelData(0);
                     for (let i = 0; i < bufferSize; i++) {
@@ -359,12 +433,12 @@
 
                     const filter = audioCtx.createBiquadFilter();
                     filter.type = 'bandpass';
-                    filter.frequency.setValueAtTime(1200, now);
-                    filter.Q.setValueAtTime(3.0, now);
+                    filter.frequency.setValueAtTime(1400, now);
+                    filter.Q.setValueAtTime(3.5, now);
 
                     const gain = audioCtx.createGain();
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
 
                     noise.connect(filter);
                     filter.connect(gain);
@@ -372,7 +446,7 @@
 
                     noise.start(now);
                 } else if (type === 'roger') {
-                    // Classic dual-tone Roger Beep on release / transmission end
+                    // Double Tone Roger Beep
                     const osc1 = audioCtx.createOscillator();
                     const osc2 = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
@@ -380,33 +454,33 @@
                     osc1.type = 'sine';
                     osc2.type = 'sine';
                     osc1.frequency.setValueAtTime(1200, now);
-                    osc2.frequency.setValueAtTime(1200, now + 0.07);
+                    osc2.frequency.setValueAtTime(1200, now + 0.06);
 
                     gain.gain.setValueAtTime(0.1, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
 
                     osc1.connect(gain);
                     osc2.connect(gain);
                     gain.connect(audioCtx.destination);
 
                     osc1.start(now);
-                    osc1.stop(now + 0.07);
-                    osc2.start(now + 0.07);
-                    osc2.stop(now + 0.15);
+                    osc1.stop(now + 0.06);
+                    osc2.start(now + 0.06);
+                    osc2.stop(now + 0.14);
                 }
             } catch (e) {
-                console.log("Audio FX error:", e);
+                console.log("Erreur effet audio:", e);
             }
         }
 
-        // Haptic Feedback Helper
-        function triggerHaptic(pattern = 30) {
+        // Retour Haptique Mobile
+        function triggerHaptic(pattern = 35) {
             if ('vibrate' in navigator) {
                 navigator.vibrate(pattern);
             }
         }
 
-        // User Media Initialization (Microphone)
+        // Initialisation de la capture microphone
         async function initMicrophone() {
             try {
                 localAudioStream = await navigator.mediaDevices.getUserMedia({
@@ -419,41 +493,37 @@
                 });
 
                 localAudioTrack = localAudioStream.getAudioTracks()[0];
-                localAudioTrack.enabled = false; // Muted by default until PTT pressed
+                localAudioTrack.enabled = false; // Micro désactivé par défaut jusqu'au PTT
 
-                micStatus.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-                micStatusText.textContent = "Micro Prêt";
+                micStatus.className = "flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                micStatusText.textContent = "Prêt";
                 micStatus.querySelector('i').replaceWith(lucide.createIcons());
                 
                 return true;
             } catch (err) {
-                console.error("Microphone Access Error:", err);
-                micStatus.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20";
-                micStatusText.textContent = "Micro Refusé";
-                alert("Accès microphone requis pour utiliser le Talkie-Walkie.");
+                console.error("Erreur accès microphone:", err);
+                micStatus.className = "flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20";
+                micStatusText.textContent = "Refusé";
+                alert("L'accès au microphone est nécessaire pour transmettre la voix.");
                 return false;
             }
         }
 
-        // Initialize PeerJS Connection Broker
+        // Initialisation du client PeerJS
         function initPeer() {
-            updateStatus('connecting', 'Connexion au serveur...');
+            updateStatus('connecting', 'Connexion au réseau...');
             
-            peer = new Peer(myGeneratedId, {
-                debug: 1
-            });
+            peer = new Peer(myGeneratedId, { debug: 1 });
 
             peer.on('open', (id) => {
                 myPeerIdEl.textContent = id;
-                updateStatus('ready', 'Prêt à connecter');
+                updateStatus('ready', 'Prêt à relier');
             });
 
             peer.on('call', async (call) => {
-                // Auto-answer incoming call
                 if (!localAudioStream) {
                     await initMicrophone();
                 }
-                
                 call.answer(localAudioStream);
                 setupCallHandlers(call);
             });
@@ -461,7 +531,7 @@
             peer.on('error', (err) => {
                 console.error("PeerJS Error:", err);
                 if (err.type === 'peer-not-found') {
-                    alert("Correspondant introuvable. Vérifiez l'ID.");
+                    alert("Correspondant introuvable. Vérifiez l'ID renseigné.");
                 }
                 updateStatus('ready', 'Erreur de connexion');
             });
@@ -471,7 +541,7 @@
             });
         }
 
-        // Setup Call Handlers & Stream Binding
+        // Configuration des événements de l'appel
         function setupCallHandlers(call) {
             activeCall = call;
 
@@ -483,11 +553,10 @@
                 connectedPeerIdShort.textContent = connectedId;
                 peerConnectedInfo.classList.remove('hidden');
                 
-                updateStatus('connected', `Relier à ${connectedId}`);
+                updateStatus('connected', `Relié à ${connectedId}`);
                 pttBtn.disabled = false;
-                pttInstruction.textContent = "Maintenez le bouton orange pour transmettre l'audio";
+                pttInstruction.textContent = "Maintenez le bouton orange pour émettre";
 
-                // Attach incoming audio analyzer for visualizer
                 setupIncomingAudioVisualizer(remoteStream);
                 playRadioSound('roger');
             });
@@ -496,8 +565,7 @@
                 handleCallDisconnected();
             });
 
-            call.on('error', (err) => {
-                console.error("Call error:", err);
+            call.on('error', () => {
                 handleCallDisconnected();
             });
         }
@@ -506,12 +574,11 @@
             activeCall = null;
             peerConnectedInfo.classList.add('hidden');
             pttBtn.disabled = true;
-            pttInstruction.textContent = "Connectez-vous à un correspondant pour émettre";
-            updateStatus('ready', 'Prêt à connecter');
+            pttInstruction.textContent = "Appairez un correspondant pour émettre";
+            updateStatus('ready', 'Prêt à relier');
             playRadioSound('roger');
         }
 
-        // Connection Status Indicator Updater
         function updateStatus(state, message) {
             statusText.textContent = message;
             statusDot.className = "w-2.5 h-2.5 rounded-full inline-block ";
@@ -527,17 +594,16 @@
             }
         }
 
-        // Connect to Remote Peer Action
         async function connectToPeer(targetPeerId) {
             if (!targetPeerId) return;
-            targetPeerId = targetPeerId.trim();
+            targetPeerId = targetPeerId.trim().toUpperCase();
 
             if (targetPeerId === myGeneratedId) {
-                alert("Vous ne pouvez pas vous connecter à vous-même.");
+                alert("Vous ne pouvez pas vous relier à vous-même.");
                 return;
             }
 
-            updateStatus('connecting', `Appel de ${targetPeerId}...`);
+            updateStatus('connecting', `Reliaison avec ${targetPeerId}...`);
 
             if (!localAudioStream) {
                 const micGranted = await initMicrophone();
@@ -548,7 +614,7 @@
             setupCallHandlers(call);
         }
 
-        // Incoming Audio Visualizer (Canvas Waveform / Signal Meter)
+        // Visualiseur Canvas du Signal Audio
         function setupIncomingAudioVisualizer(stream) {
             initAudioContext();
             const source = audioCtx.createMediaStreamSource(stream);
@@ -576,28 +642,26 @@
             const dataArray = new Uint8Array(bufferLength);
             incomingAnalyser.getByteFrequencyData(dataArray);
 
-            // Calculate average volume level
             let sum = 0;
             for (let i = 0; i < bufferLength; i++) {
                 sum += dataArray[i];
             }
             const average = sum / bufferLength;
 
-            if (average > 10) {
+            if (average > 8 || isTransmitting) {
                 receptiveSignalText.classList.add('hidden');
             } else {
                 receptiveSignalText.classList.remove('hidden');
             }
 
-            // Draw Audio Spectrum Bars
-            const barWidth = (width / bufferLength) * 1.5;
+            const barWidth = (width / bufferLength) * 1.4;
             let x = 0;
 
             for (let i = 0; i < bufferLength; i++) {
                 const barHeight = (dataArray[i] / 255) * height;
 
                 const gradient = canvasCtx.createLinearGradient(0, height, 0, 0);
-                gradient.addColorStop(0, 'rgba(255, 152, 0, 0.2)');
+                gradient.addColorStop(0, 'rgba(255, 152, 0, 0.15)');
                 gradient.addColorStop(1, '#ff9800');
 
                 canvasCtx.fillStyle = gradient;
@@ -607,7 +671,7 @@
             }
         }
 
-        // Push-To-Talk (PTT) Logic
+        // Logique PTT (Pointer Events unifiés)
         function startTransmission(e) {
             if (e) e.preventDefault();
             if (!activeCall || isTransmitting) return;
@@ -620,10 +684,10 @@
             }
 
             pttBtn.classList.add('active');
-            pttInstruction.textContent = "TRANSMISSION AUDIO EN COURS...";
+            pttInstruction.textContent = "ÉMISSION VOCALE EN COURS...";
             pttInstruction.classList.add('text-amber-400', 'font-bold');
 
-            triggerHaptic([40]);
+            triggerHaptic(40);
             playRadioSound('start');
         }
 
@@ -638,57 +702,41 @@
             }
 
             pttBtn.classList.remove('active');
-            pttInstruction.textContent = "Maintenez le bouton orange pour transmettre l'audio";
+            pttInstruction.textContent = "Maintenez le bouton orange pour émettre";
             pttInstruction.classList.remove('text-amber-400', 'font-bold');
 
-            triggerHaptic([20, 30]);
+            triggerHaptic(20);
             playRadioSound('roger');
         }
 
-        // PTT Event Listeners (Touch & Mouse Support)
-        pttBtn.addEventListener('mousedown', startTransmission);
-        pttBtn.addEventListener('mouseup', stopTransmission);
-        pttBtn.addEventListener('mouseleave', stopTransmission);
+        // Événements du Bouton PTT
+        pttBtn.addEventListener('pointerdown', startTransmission);
+        pttBtn.addEventListener('pointerup', stopTransmission);
+        pttBtn.addEventListener('pointerleave', stopTransmission);
 
-        pttBtn.addEventListener('touchstart', startTransmission, { passive: false });
-        pttBtn.addEventListener('touchend', stopTransmission, { passive: false });
-        pttBtn.addEventListener('touchcancel', stopTransmission, { passive: false });
-
-        // Volume & Mute Controls
+        // Contrôle du Volume et Muet
         volumeSlider.addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
             remoteAudio.volume = val;
-            if (val === 0) {
-                isMuted = true;
-                muteIcon.setAttribute('data-lucide', 'volume-x');
-            } else {
-                isMuted = false;
-                muteIcon.setAttribute('data-lucide', 'volume-2');
-            }
+            isMuted = (val === 0);
+            muteIcon.setAttribute('data-lucide', isMuted ? 'volume-x' : 'volume-2');
             lucide.createIcons();
         });
 
         muteBtn.addEventListener('click', () => {
             isMuted = !isMuted;
-            if (isMuted) {
-                remoteAudio.volume = 0;
-                volumeSlider.value = 0;
-                muteIcon.setAttribute('data-lucide', 'volume-x');
-            } else {
-                remoteAudio.volume = 1;
-                volumeSlider.value = 1;
-                muteIcon.setAttribute('data-lucide', 'volume-2');
-            }
+            remoteAudio.volume = isMuted ? 0 : 1;
+            volumeSlider.value = isMuted ? 0 : 1;
+            muteIcon.setAttribute('data-lucide', isMuted ? 'volume-x' : 'volume-2');
             lucide.createIcons();
         });
 
-        // Copy ID Button
+        // Copier mon ID
         document.getElementById('copyIdBtn').addEventListener('click', () => {
             const textToCopy = myPeerIdEl.textContent;
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(textToCopy);
             } else {
-                // Fallback execCommand
                 const input = document.createElement('input');
                 input.value = textToCopy;
                 document.body.appendChild(input);
@@ -696,17 +744,25 @@
                 document.execCommand('copy');
                 document.body.removeChild(input);
             }
-            triggerHaptic(20);
+            triggerHaptic(25);
             alert(`ID Talkie copié : ${textToCopy}`);
         });
 
-        // Manual Connection Form Submit
+        // Bouton de Connexion manuelle
         connectBtn.addEventListener('click', () => {
-            const targetId = remotePeerIdInput.value;
-            connectToPeer(targetId);
+            connectToPeer(remotePeerIdInput.value);
         });
 
-        // QR Code Generator Modal Handler
+        // Modale d'aide '?'
+        const helpModal = document.getElementById('helpModal');
+        document.getElementById('helpBtn').addEventListener('click', () => {
+            helpModal.classList.remove('hidden');
+        });
+        document.getElementById('closeHelpModal').addEventListener('click', () => {
+            helpModal.classList.add('hidden');
+        });
+
+        // Modale QR Code Générateur
         const qrModal = document.getElementById('qrModal');
         const qrcodeContainer = document.getElementById('qrcodeContainer');
         const qrPeerIdText = document.getElementById('qrPeerIdText');
@@ -715,8 +771,8 @@
             qrcodeContainer.innerHTML = '';
             new QRCode(qrcodeContainer, {
                 text: myGeneratedId,
-                width: 180,
-                height: 180,
+                width: 170,
+                height: 170,
                 colorDark: "#121212",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
@@ -729,7 +785,7 @@
             qrModal.classList.add('hidden');
         });
 
-        // QR Code Scanner Logic via Native Camera getUserMedia
+        // Scanner QR Code par Caméra
         const scannerModal = document.getElementById('scannerModal');
         const scannerVideo = document.getElementById('scannerVideo');
 
@@ -741,7 +797,7 @@
                 });
                 scannerVideo.srcObject = videoScannerStream;
             } catch (err) {
-                alert("Impossible d'accéder à la caméra pour scanner.");
+                alert("Impossible d'accéder à la caméra pour le scan.");
                 scannerModal.classList.add('hidden');
             }
         });
@@ -756,33 +812,52 @@
 
         document.getElementById('closeScannerModal').addEventListener('click', closeScanner);
 
-        // QR Code File Upload Fallback Scanner
+        // Scan depuis un fichier image
         document.getElementById('qrFileInput').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = (event) => {
-                const img = new Image();
-                img.onload = () => {
-                    // Manual QR Decode attempt prompt for fallback
-                    const promptVal = prompt("ID du Talkie détecté sur l'image (saisie rapide) :", "");
-                    if (promptVal) {
-                        remotePeerIdInput.value = promptVal;
-                        closeScanner();
-                        connectToPeer(promptVal);
-                    }
-                };
-                img.src = event.target.result;
+                const promptVal = prompt("Saisissez l'ID Talkie figurant sur l'image :", "");
+                if (promptVal) {
+                    remotePeerIdInput.value = promptVal;
+                    closeScanner();
+                    connectToPeer(promptVal);
+                }
             };
             reader.readAsDataURL(file);
         });
 
-        // App Initialization on Page Load
+        // GESTION DU BOUTON FLOTTANT D'INSTALLATION PWA
+        const pwaInstallContainer = document.getElementById('pwaInstallContainer');
+        const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaInstallContainer.classList.remove('hidden');
+        });
+
+        pwaInstallBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                pwaInstallContainer.classList.add('hidden');
+            }
+            deferredPrompt = null;
+        });
+
+        window.addEventListener('appinstalled', () => {
+            pwaInstallContainer.classList.add('hidden');
+            deferredPrompt = null;
+        });
+
+        // Démarrage de l'application
         window.addEventListener('load', () => {
             initPeer();
-            // Pre-request microphone permission on first click anywhere
-            document.body.addEventListener('click', () => {
+            document.body.addEventListener('pointerdown', () => {
                 initAudioContext();
                 if (!localAudioStream) {
                     initMicrophone();
